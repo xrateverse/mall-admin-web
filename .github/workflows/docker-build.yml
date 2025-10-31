@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '16'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: 清理磁盘空间
         run: |
@@ -91,22 +91,15 @@ jobs:
           username: ${{ secrets.ALIYUN_DOCKER_USER }}
           password: ${{ secrets.ALIYUN_DOCKER_TOKEN }}
 
-      - name: 启用 Corepack 并安装 Yarn
-        run: |
-          echo "启用 Corepack..."
-          corepack enable
-          corepack prepare yarn@stable --activate
-          yarn --version
-
       - name: 安装依赖
         run: |
           echo "安装 mall-admin-web 依赖..."
-          yarn install --frozen-lockfile || yarn install
+          npm ci || npm install
 
       - name: 运行代码检查和测试
         run: |
           echo "运行代码检查..."
-          yarn lint || echo "Lint 检查警告,继续构建"
+          npm run lint || echo "Lint 检查警告,继续构建"
           echo "跳过测试,直接构建"
 
       - name: 监控系统资源

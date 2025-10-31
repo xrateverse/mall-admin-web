@@ -9,22 +9,18 @@ FROM node:16-bullseye as build-stage
 # 设置工作目录
 WORKDIR /app
 
-# 安装 yarn (使用 corepack)
-RUN corepack enable && corepack prepare yarn@stable --activate
-
 # 复制依赖配置文件
 COPY package*.json ./
-COPY yarn.lock* ./
 
 # 安装项目依赖
 # Debian环境自带Python和g++,node-sass可以正常编译
-RUN yarn install --frozen-lockfile || yarn install
+RUN npm ci || npm install
 
 # 复制项目源码
 COPY . .
 
 # 构建项目
-RUN yarn build
+RUN npm run build
 
 # 验证构建产物
 RUN ls -la /app/dist && echo "✅ 构建产物验证成功"
