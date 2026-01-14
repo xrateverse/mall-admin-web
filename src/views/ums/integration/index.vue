@@ -167,10 +167,16 @@
     <el-dialog
       title="冻结详情"
       :visible.sync="freezeDialogVisible"
-      width="60%">
+      width="80%">
       <el-table :data="freezeList" v-loading="freezeLoading" border>
-        <el-table-column label="冻结积分" align="center">
+        <el-table-column label="冻结积分" align="center" width="100">
           <template slot-scope="scope">{{scope.row.freezeAmount}}</template>
+        </el-table-column>
+        <el-table-column label="业务类型" align="center" width="150">
+          <template slot-scope="scope">{{scope.row.businessType || '-'}}</template>
+        </el-table-column>
+        <el-table-column label="业务ID" align="center" width="180">
+          <template slot-scope="scope">{{scope.row.businessId || '-'}}</template>
         </el-table-column>
         <el-table-column label="冻结时间" width="160" align="center">
           <template slot-scope="scope">{{scope.row.createTime | formatDateTime}}</template>
@@ -181,7 +187,7 @@
         <el-table-column label="备注" align="center">
           <template slot-scope="scope">{{scope.row.operateNote}}</template>
         </el-table-column>
-        <el-table-column label="状态" align="center">
+        <el-table-column label="状态" align="center" width="90">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 0" type="warning">冻结中</el-tag>
             <el-tag v-else-if="scope.row.status === 1" type="success">已扣减</el-tag>
@@ -212,21 +218,27 @@
     <el-dialog
       title="积分历史"
       :visible.sync="historyDialogVisible"
-      width="70%">
+      width="90%">
       <el-table :data="historyList" v-loading="historyLoading" border>
-        <el-table-column label="变动类型" align="center">
+        <el-table-column label="变动类型" align="center" width="90">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.changeType === 0" type="success">增加</el-tag>
             <el-tag v-else type="warning">减少</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="变动积分" align="center">
+        <el-table-column label="变动积分" align="center" width="100">
           <template slot-scope="scope">{{scope.row.changeCount}}</template>
         </el-table-column>
-        <el-table-column label="来源类型" align="center">
+        <el-table-column label="业务类型" align="center" width="150">
+          <template slot-scope="scope">{{scope.row.businessType || '-'}}</template>
+        </el-table-column>
+        <el-table-column label="业务ID" align="center" width="180">
+          <template slot-scope="scope">{{scope.row.businessId || '-'}}</template>
+        </el-table-column>
+        <el-table-column label="来源类型" align="center" width="120">
           <template slot-scope="scope">{{getSourceTypeLabel(scope.row.sourceType)}}</template>
         </el-table-column>
-        <el-table-column label="操作人" align="center">
+        <el-table-column label="操作人" align="center" width="100">
           <template slot-scope="scope">{{scope.row.operateMan || '-'}}</template>
         </el-table-column>
         <el-table-column label="操作备注" align="center">
