@@ -170,22 +170,37 @@
       width="60%">
       <el-table :data="freezeList" v-loading="freezeLoading" border>
         <el-table-column label="冻结积分" align="center">
-          <template slot-scope="scope">{{scope.row.freezeIntegration}}</template>
+          <template slot-scope="scope">{{scope.row.freezeAmount}}</template>
         </el-table-column>
         <el-table-column label="冻结时间" width="160" align="center">
           <template slot-scope="scope">{{scope.row.createTime | formatDateTime}}</template>
         </el-table-column>
         <el-table-column label="到期时间" width="160" align="center">
-          <template slot-scope="scope">{{scope.row.expireTime | formatDateTime}}</template>
+          <template slot-scope="scope">{{scope.row.releaseTime | formatDateTime}}</template>
         </el-table-column>
         <el-table-column label="备注" align="center">
-          <template slot-scope="scope">{{scope.row.note}}</template>
+          <template slot-scope="scope">{{scope.row.operateNote}}</template>
         </el-table-column>
         <el-table-column label="状态" align="center">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 0" type="warning">冻结中</el-tag>
             <el-tag v-else-if="scope.row.status === 1" type="success">已扣减</el-tag>
             <el-tag v-else type="info">已释放</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" align="center">
+          <template slot-scope="scope">
+            <!-- 仅显示冻结中状态的操作 -->
+            <el-dropdown @command="handleFreezeOperation($event, scope.row)" v-if="scope.row.status === 0">
+              <el-button type="primary" size="mini">
+                操作 <i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="release">释放</el-dropdown-item>
+                <el-dropdown-item command="deduct">扣减</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <span v-else style="color: #999;">-</span>
           </template>
         </el-table-column>
       </el-table>
@@ -240,7 +255,7 @@
   </div>
 </template>
 <script>
-  import {fetchList, addIntegration, reduceIntegration, giftIntegration, fetchFreezeList, fetchHistory} from '@/api/integration';
+  import {fetchList, addIntegration, reduceIntegration, giftIntegration, fetchFreezeList, fetchHistory, deductIntegration, releaseIntegration} from '@/api/integration';
   import {formatDate} from '@/utils/date';
 
   const defaultListQuery = {
@@ -455,6 +470,107 @@
           this.$message({
             type: 'error',
             message: '获取冻结详情失败：' + (error.message || '未知错误')
+          });
+        });
+      },
+      /**
+       * 处理冻结积分操作
+       */
+      handleFreezeOperation(command, row) {
+        const operationText = command === 'release' ? '释放' : '扣减';
+
+        this.$confirm(`确认${operationText}该笔冻结积分吗？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 根据操作类型调用不同的 API
+          if (command === 'release') {
+            this.handleRelease(row);
+          } else if (command === 'deduct') {
+            this.handleDeduct(row);
+          }
+        }).catch(() => {
+          // 取消操作
+        });
+      },
+      /**
+       * 释放冻结积分
+       */
+      handleRelease(row) {
+        const loading = this.$loading({
+          lock: true,
+          text: '正在释放...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+
+        releaseIntegration({
+          businessId: row.businessId,
+          operateNote: '管理员手动释放'
+        }).then(response => {
+          loading.close();
+          this.$message({
+            type: 'success',
+            message: '释放成功'
+          });
+          // 刷新冻结详情列表
+          this.refreshFreezeList(row.memberId);
+          // 刷新主列表
+          this.getList();
+        }).catch(error => {
+          loading.close();
+          this.$message({
+            type: 'error',
+            message: '释放失败：' + (error.message || '未知错误')
+          });
+        });
+      },
+      /**
+       * 扣减冻结积分
+       */
+      handleDeduct(row) {
+        const loading = this.$loading({
+          lock: true,
+          text: '正在扣减...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+
+        deductIntegration({
+          businessId: row.businessId,
+          sourceType: 9  // 9 表示管理员手动扣减
+        }).then(response => {
+          loading.close();
+          this.$message({
+            type: 'success',
+            message: '扣减成功'
+          });
+          // 刷新冻结详情列表
+          this.refreshFreezeList(row.memberId);
+          // 刷新主列表
+          this.getList();
+        }).catch(error => {
+          loading.close();
+          this.$message({
+            type: 'error',
+            message: '扣减失败：' + (error.message || '未知错误')
+          });
+        });
+      },
+      /**
+       * 刷新冻结详情列表
+       */
+      refreshFreezeList(memberId) {
+        this.freezeLoading = true;
+        fetchFreezeList(memberId).then(response => {
+          this.freezeLoading = false;
+          this.freezeList = response.data;
+        }).catch(error => {
+          this.freezeLoading = false;
+          this.$message({
+            type: 'error',
+            message: '刷新列表失败：' + (error.message || '未知错误')
           });
         });
       },
