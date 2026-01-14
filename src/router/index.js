@@ -423,6 +423,12 @@ export const asyncRouterMap = [
         component: () => import('@/views/ums/resource/categoryList'),
         meta: {title: '资源分类'},
         hidden: true
+      },
+      {
+        path: 'integration',
+        name: 'integration',
+        component: () => import('@/views/ums/integration/index'),
+        meta: {title: '积分管理', icon: 'el-icon-coin'}
       }
     ]
   },
