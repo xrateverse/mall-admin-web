@@ -45,7 +45,7 @@
           <template slot-scope="scope">{{scope.row.integration}}</template>
         </el-table-column>
         <el-table-column label="冻结积分" align="center">
-          <template slot-scope="scope">{{scope.row.freezeIntegration}}</template>
+          <template slot-scope="scope">{{scope.row.freezeIntegration || 0}}</template>
         </el-table-column>
         <el-table-column label="套餐名称" align="center">
           <template slot-scope="scope">{{scope.row.memberLevelName || 'N/A'}}</template>
