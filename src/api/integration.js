@@ -67,12 +67,16 @@ export function giftIntegration(data) {
 /**
  * 查询冻结详情
  * @param {string} memberId - 会员ID
- * @returns {Promise<Array>} 冻结详情列表
+ * @param {Object} params - 查询参数
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise<{total: number, list: Array}>} 冻结详情数据
  */
-export function fetchFreezeList(memberId) {
+export function fetchFreezeList(memberId, params) {
   return request({
     url:`/admin/integration/freeze/${memberId}`,
-    method:'get'
+    method:'get',
+    params
   })
 }
 

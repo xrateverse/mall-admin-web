@@ -175,7 +175,7 @@
         <el-table-column label="业务类型" align="center" width="150">
           <template slot-scope="scope">{{scope.row.businessType || '-'}}</template>
         </el-table-column>
-        <el-table-column label="业务ID" align="center" width="180">
+        <el-table-column label="业务ID" align="center" width="220" show-overflow-tooltip>
           <template slot-scope="scope">{{scope.row.businessId || '-'}}</template>
         </el-table-column>
         <el-table-column label="冻结时间" width="160" align="center">
@@ -184,17 +184,17 @@
         <el-table-column label="到期时间" width="160" align="center">
           <template slot-scope="scope">{{scope.row.releaseTime | formatDateTime}}</template>
         </el-table-column>
-        <el-table-column label="备注" align="center">
-          <template slot-scope="scope">{{scope.row.operateNote}}</template>
+        <el-table-column label="备注" align="center" show-overflow-tooltip>
+          <template slot-scope="scope">{{formatNote(scope.row.operateNote)}}</template>
         </el-table-column>
-        <el-table-column label="状态" align="center" width="90">
+        <el-table-column label="状态" align="center" width="90" fixed="right">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 0" type="warning">冻结中</el-tag>
             <el-tag v-else-if="scope.row.status === 1" type="success">已扣减</el-tag>
             <el-tag v-else type="info">已释放</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" align="center">
+        <el-table-column label="操作" width="120" align="center" fixed="right">
           <template slot-scope="scope">
             <!-- 仅显示冻结中状态的操作 -->
             <el-dropdown @command="handleFreezeOperation($event, scope.row)" v-if="scope.row.status === 0">
@@ -210,6 +210,18 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-container">
+        <el-pagination
+          background
+          @size-change="handleFreezeSizeChange"
+          @current-change="handleFreezeCurrentChange"
+          layout="total, sizes,prev, pager, next,jumper"
+          :current-page.sync="freezeQuery.pageNum"
+          :page-size="freezeQuery.pageSize"
+          :page-sizes="[10,15,20]"
+          :total="freezeTotal">
+        </el-pagination>
+      </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="freezeDialogVisible = false" size="small">关 闭</el-button>
       </span>
@@ -317,7 +329,9 @@
           ]
         },
         freezeList: [],
+        freezeTotal: null,
         freezeLoading: false,
+        freezeQuery: Object.assign({}, { pageNum: 1, pageSize: 10 }),
         historyList: [],
         historyTotal: null,
         historyLoading: false,
@@ -473,10 +487,19 @@
       },
       handleFreezeDetail(row) {
         this.freezeDialogVisible = true;
+        this.currentMemberId = row.id;
+        this.freezeQuery = { pageNum: 1, pageSize: 10 };
+        this.getFreezeList();
+      },
+      /**
+       * 获取冻结详情列表
+       */
+      getFreezeList() {
         this.freezeLoading = true;
-        fetchFreezeList(row.id).then(response => {
+        fetchFreezeList(this.currentMemberId, this.freezeQuery).then(response => {
           this.freezeLoading = false;
-          this.freezeList = response.data;
+          this.freezeList = response.data.list;
+          this.freezeTotal = response.data.total;
         }).catch(error => {
           this.freezeLoading = false;
           this.$message({
@@ -574,17 +597,23 @@
        * 刷新冻结详情列表
        */
       refreshFreezeList(memberId) {
-        this.freezeLoading = true;
-        fetchFreezeList(memberId).then(response => {
-          this.freezeLoading = false;
-          this.freezeList = response.data;
-        }).catch(error => {
-          this.freezeLoading = false;
-          this.$message({
-            type: 'error',
-            message: '刷新列表失败：' + (error.message || '未知错误')
-          });
-        });
+        this.currentMemberId = memberId;
+        this.getFreezeList();
+      },
+      /**
+       * 冻结详情分页大小变化
+       */
+      handleFreezeSizeChange(val) {
+        this.freezeQuery.pageNum = 1;
+        this.freezeQuery.pageSize = val;
+        this.getFreezeList();
+      },
+      /**
+       * 冻结详情当前页变化
+       */
+      handleFreezeCurrentChange(val) {
+        this.freezeQuery.pageNum = val;
+        this.getFreezeList();
       },
       handleHistory(row) {
         this.historyDialogVisible = true;
@@ -614,6 +643,13 @@
       handleHistoryCurrentChange(val) {
         this.historyQuery.pageNum = val;
         this.getHistoryList();
+      },
+      /**
+       * 格式化备注显示
+       */
+      formatNote(note) {
+        if (!note) return '-';
+        return note.length > 20 ? note.substring(0, 20) + '...' : note;
       },
       getSourceTypeLabel(sourceType) {
         const sourceTypeMap = {
