@@ -574,7 +574,7 @@
 
         deductIntegration({
           businessId: row.businessId,
-          sourceType: 9  // 9 表示管理员手动扣减
+          sourceType: 12  // 12 表示扣减
         }).then(response => {
           loading.close();
           this.$message({
@@ -659,7 +659,9 @@
           7: '订单支付',
           8: '订单取消',
           9: '冻结',
-          10: '释放'
+          10: '释放',
+          11: '视频生成',
+          12: '扣减'
         };
         return sourceTypeMap[sourceType] || '未知来源';
       }
