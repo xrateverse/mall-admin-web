@@ -4,6 +4,6 @@ const prodEnv = require('./prod.env')
 
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
-  BASE_API: '"http://localhost:8080"',
+  BASE_API: '"http://localhost:8080/api"',
   VUE_APP_FILE_BASE_URL: '"https://minio.ratev.ai/mall"'
 })
