@@ -1,19 +1,19 @@
 name: Build and Push Mall-Admin-Web Docker Image
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch: # Manual trigger
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - master
     paths:
-      - '**'
-      - '.github/workflows/docker-build.yml'
+      - "**"
+      - ".github/workflows/docker-build.yml"
 
 env:
-  ALIYUN_DOCKER_REGISTRY: crpi-4z4v1n5g8hbg9g3x.cn-hangzhou.personal.cr.aliyuncs.com
-  IMAGE_NAME: crpi-4z4v1n5g8hbg9g3x.cn-hangzhou.personal.cr.aliyuncs.com/beilv-agent/mall-admin-web
+  ALIYUN_DOCKER_REGISTRY: crpi-ni3ahd37mttrjwgx.cn-hangzhou.personal.cr.aliyuncs.com
+  IMAGE_NAME: crpi-ni3ahd37mttrjwgx.cn-hangzhou.personal.cr.aliyuncs.com/ratev-agent/mall-admin-web
 
 jobs:
   build-and-push:
@@ -45,8 +45,8 @@ jobs:
       - name: 设置 Node.js 环境
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
 
       - name: 清理磁盘空间
         run: |
